@@ -1,0 +1,336 @@
+;;; Build rules from trajectories, e.g. Lloyds data
+;;; Input: trajectory file (Lloyds),
+;;; min length of trajectory (defaut 8)
+;;; max order (to prevent the search from growing infinitely) (default 5)
+;;; distance method (default cosine distance)
+;;; distance tolerance
+;;; min support
+;;; digits for testing (not used for building rules) (default 3)
+
+;;; output: rules of variable lengths, and frequencies (e.g. A,B,C -> D 45)
+;;; output can be used for building our new network representations
+;;; The new network representation can then be used to simulate walking
+;;; Then a measure will be used to test the performance.
+
+;;; Note: for support, redundant observations for same vessel (trajectory) are
+;;; neglected. In other words, support is # of trajectories containing the
+;;; observation
+;;; If we need to use the old way, change pushnew to push
+
+;;; Note2: changed from pushnew to push 2014-11-21
+;;; Note3: support changed from # of instances in "from" to # of instances in "from->to"
+
+;;; Jian Xu, 2014-11-24
+
+
+;(declaim (optimize (debug 3)))
+
+
+;; parameters
+;(defparameter *input-data-file* "test-trace.csv")
+;(defparameter *input-data-file* "traces-lloyds.csv")
+;(defparameter *input-data-file* "traces-weibo-10M.txt")
+(defparameter *input-data-file* "traces-clickstream-all.csv")
+;(defparameter *input-data-file* "traces-nd.csv")
+(defparameter *min-length-of-trajectory* 8) ;!!!!!!!!!!
+;;;;;;;!!!!!!!!!!!!!!!!!!!!!!!!!
+(defparameter *max-order* 1)
+;(defparameter *max-order* 1)
+(defparameter *distance-method* "cosine")
+(defparameter *distance-tolerance* 0.1);;!!!!!!!!!!!!!!
+;(defparameter *min-support* 10)
+(defparameter *min-support* 5)
+(defparameter *digits-for-testing* 3) ;!!!!!!!!!!
+;(defparameter *digits-for-testing* 10)
+
+;(defparameter *output-rules-file* "rules-weibo-mo1-ms10.csv")
+;(defparameter *output-rules-file* "rules-lloyds-mo4-ms1-t01.csv")
+;(defparameter *output-rules-file* "rules-conventional-sup10.csv")
+(defparameter *output-rules-file* "rules-clickstream-all-mo1.csv")
+;(defparameter *output-rules-file* "rules-nd.csv")
+;(defparameter *output-rules-file* "rules-nd-conventional-sup10.csv")
+
+;;; data
+;; vessel -> trajectory except last xxx steps
+(defparameter *training* (make-hash-table :test #'equal))
+(defparameter *testing* nil)
+;; observations such as A B -> C support (v1 v2 v4)
+(defparameter *observations* (make-hash-table :test #'equal))
+(defparameter *rules* (make-hash-table :test #'equal))
+(defparameter *distributions* (make-hash-table :test #'equal))
+(defparameter *distributions-keys* nil)
+
+;;;;;;;;;;;;;;;
+;;; updated 2014-11-20
+
+(require :split-sequence)
+(use-package :split-sequence)
+
+;(ql:quickload 'lparallel)
+;(require :lparallel)
+(defun read-lines-from-file (filename)
+  (printf "read file")
+  (with-open-file (stream filename)
+    (loop for line = (read-line stream nil)
+          while line
+          collect line)))
+
+(defun split-line (deliminator line)
+  (split-sequence:split-sequence deliminator line))
+
+(defun read-lines-from-file-and-split (deliminator filename)
+  (printf "read file")
+  (with-open-file (stream filename)
+    (loop for line = (read-line stream nil)
+          while line
+          collect (split-line deliminator line))))
+
+(defun convert-pair-to-hash-table (pairs)
+  (let ((dict (make-hash-table :test #'equal)))
+    (dolist (pair pairs)
+      (let ((key (first pair))
+            (val (second pair)))
+        (setf (gethash key dict) val)))
+    dict))
+
+(defmacro printf (stuff)
+  `(progn (print ,stuff)
+          (finish-output t)))
+
+(defun parse-lists-for-integer (trajectories)
+  (loop for trajectory in trajectories
+        collect (mapcar #'parse-integer trajectory)))
+
+(defun hash-keys (hash-table)
+  (loop for key being the hash-keys of hash-table collect key))
+
+(defun hash-values (hash-table)
+  (loop for value being the hash-values of hash-table collect value))
+
+;;;;;;;;;;;;;;;;;;
+
+(defun filter-by-min-length (trajectories)
+  (remove-if #'(lambda (trajectory) (< (length trajectory)
+                                       (1+ *min-length-of-trajectory*)))
+             trajectories))
+
+(defun build-training (trajectories)
+  (printf "build training")
+  (dolist (trajectory trajectories)
+    (let* ((vessel (first trajectory))
+           (ports (cdr trajectory))
+           (training-ports (subseq ports 0 (- (length ports)
+                                              *digits-for-testing*))))
+      (setf (gethash vessel *training*) training-ports))))
+
+(defun build-observations ()
+  (printf "building observations")
+  (loop for order from 1 to *max-order*
+        do (build-observations-for-order order))
+  (clrhash *training*) ; release space occupied by *training*
+  )
+
+(defun build-observations-for-order (order)
+  (loop for vessel being the hash-keys in *training*
+        do (build-observations-for-vessel order vessel)))
+
+(defun build-observations-for-vessel (order vessel)
+  (let ((trajectory (gethash vessel *training*)))
+    (dotimes (starting (- (length trajectory)
+                          order))
+      (let* ((observation (reverse (subseq trajectory starting (+ 1
+                                                                  (+ starting order)))))
+             (to (pop observation))
+             (from (reverse observation)))
+        ;(printf `(,from ,to ,vessel))
+        (save-to-observations from to vessel)))))
+
+(defun save-to-observations (from to vessel)
+  (if (null (gethash from *observations*))
+      (setf (gethash from *observations*) (make-hash-table)))
+  (if (null (gethash to (gethash from *observations*)))
+      (setf (gethash to (gethash from *observations*)) nil))
+  ;;; Change the following line pushnew <-> push to change "support"
+  ;(pushnew vessel (gethash to (gethash from *observations*))))
+  (push vessel (gethash to (gethash from *observations*))))
+
+
+(defun cleanup ()
+  (defparameter *training* (make-hash-table :test #'equal))
+  (defparameter *testing* nil)
+  (defparameter *observations* (make-hash-table :test #'equal))
+  (defparameter *rules* (make-hash-table :test #'equal))
+  (defparameter *distributions* (make-hash-table :test #'equal))
+  (defparameter *distributions-keys* nil)
+)
+
+;; The following puts restriction of min support for "from"
+(defun build-distributions-support-for-from ()
+  (printf "building distributions")
+  (dolist (from (hash-keys *observations*))
+    (let ((to-options (gethash from *observations*))
+          (support -1))
+      ;; compute support
+      (setf support
+            (apply #'+ (mapcar #'(lambda (x) (length x))
+                               (hash-values to-options))))
+      (when (>= support *min-support*)
+        (setf (gethash from *distributions*) nil)
+        (setf (getf (gethash from *distributions*) :support)
+              support)
+        ;; compute probabilitites
+        (setf (getf (gethash from *distributions*) :distribution) (make-hash-table))
+        (dolist (to (hash-keys to-options))
+          (setf (gethash to (getf (gethash from *distributions*) :distribution))
+                (/ (length (gethash to to-options))
+                   support))))))
+  (clrhash *observations*) ; free it to save space
+)
+
+
+;; The following puts restriction of min support for every path (for "to")
+(defun build-distributions ()
+  (printf "building distributions")
+  (dolist (from (hash-keys *observations*))
+    (let ((to-options (gethash from *observations*))
+          (support -1))
+      ;; compute support
+      (setf support
+            (apply #'+ (remove-if #'(lambda (x) (< x *min-support*))
+                                  (mapcar #'(lambda (x) (length x))
+                                          (hash-values to-options)))))
+      (when (>= support *min-support*)
+        (setf (gethash from *distributions*) nil)
+        (setf (getf (gethash from *distributions*) :support)
+              support)
+        ;; compute probabilitites
+        (setf (getf (gethash from *distributions*) :distribution) (make-hash-table))
+        (dolist (to (remove-if #'(lambda (x) (< (length (gethash x to-options))
+                                                *min-support*))
+                               (hash-keys to-options)))
+          (setf (gethash to (getf (gethash from *distributions*) :distribution))
+                (/ (length (gethash to to-options))
+                   support))))))
+  (clrhash *observations*) ; free it to save space
+  )
+
+(defun generate-all-rules ()
+  (printf "generating all rules")
+  (let ((order-1-froms (remove-if #'(lambda (from) (> (length from)
+                                                             1))
+                                  *distributions-keys*)))
+    (dolist (from order-1-froms)
+      (extend-rule from from 1))))
+    ;(lparallel.cognate:pmapcar (lambda (from) (extend-rule from from 1))
+    ;                           order-1-froms)))
+
+(defun extend-rule (valid-from curr-from order)
+  ;; valid-from: last known "from"  with significantly different distrib.
+  ;; if min-support or max-order is not met, valid-from will be added
+  ;; to *rules* instead of growing children.
+  ;; curr-from: current "from" or parent of the ongoing search.
+  ;; If a new child with significantly different distribution is found,
+  ;; this process will do recursion with the discovered child as new valid-from
+  ;; otherwise keep growing with previous valid-from
+
+  ;; if reaches max order, add valid-from to rules and stop
+  (if (> (1+ order)
+         *max-order*)
+      (add-to-rules valid-from)
+      (let* ((parent (gethash valid-from *distributions*))
+             (parent-distribution (getf parent :distribution))
+             (new-order (1+ order))
+             (children-from (remove-if #'(lambda (from)
+                                           ;; if length is not what we want
+                                           (or (/= new-order
+                                                   (length from))
+                                               ;; or if tail is not the same
+                                               (not (equal (cdr from)
+                                                           curr-from))))
+                                       *distributions-keys*)))
+        ;(printf `("v" ,valid-from "c" ,curr-from "o" ,order "c" ,children-from))
+        ;; if no further rules available, add valid-from to *rules*
+        (if (null children-from)
+            (add-to-rules valid-from)
+            (dolist (child-from children-from)
+              (let* ((child (gethash child-from *distributions*))
+                     (child-support (getf child :support)))
+                                        ; test support: if insufficient, add valid-from to rules and stop)
+                                        ; always true for new distribution function
+                (if (< child-support *min-support*)
+                    (add-to-rules valid-from)
+                    (let ((child-distribution (getf child :distribution)))
+                                        ; test distribution: if similar, grow and keep valid-from
+                                        ; if not similar, set new valid-from and grow recursively
+                      ;(printf "enough support")
+                      ;(printf "child")
+                      ;(maphash #'(lambda (k v) (format t "~a => ~a~%" k v)) child-distribution)
+                      ;(printf "parent")
+                      ;(maphash #'(lambda (k v) (format t "~a => ~a~%" k v)) parent-distribution)
+                      ;(printf (cosine-similarity child-distribution parent-distribution))
+                      ;(printf (distribution-similar child-distribution parent-distribution))
+                      (if (distribution-similar child-distribution
+                                                parent-distribution)
+                          (extend-rule valid-from child-from new-order)
+                          (extend-rule child-from child-from new-order))))))))))
+
+;; use predefined distance method to compute distance between vector a and b
+;; a and b are hash tables, probably having different keys
+;; if key is present in a but not in b, set it 0
+;; compare the distance with distance threshold to say if a and b are similar
+(defun distribution-similar (a b)
+  (if (equal *distance-method* "cosine")
+      (if (<= (- 1
+                 (cosine-similarity a b))
+              *distance-tolerance*)
+          t
+          nil)))
+
+(defun sum-of-squares (ht)
+  (loop for item being the hash-values in ht
+        summing (* item item)))
+
+(defun get-probability (key ht)
+  (if (null (gethash key ht))
+      0
+      (gethash key ht)))
+
+(defun cosine-similarity (a b)
+  (let ((union-toos (union (hash-keys a) (hash-keys b)))
+        (sum-upper 0))
+    (dolist (to union-toos)
+      (incf sum-upper (* (get-probability to a)
+                         (get-probability to b))))
+    (/ sum-upper
+       (* (sqrt (sum-of-squares a))
+          (sqrt (sum-of-squares b))))))
+
+;; Iteratively add rules and preceeding rules to rules list for easy building of network representation
+(defun add-to-rules (from)
+  (when (not (null from))
+    (setf (gethash from *rules*) (gethash from *distributions*))
+    (add-to-rules (butlast from))))
+  ;(maplist #'(lambda (x) (setf (gethash x *rules*) (gethash x *distributions*)))
+  ;         from))
+  ;(setf (gethash from *rules*) (gethash from *distributions*)))
+
+(defun output-rules ()
+  (printf "writing all rules")
+  (with-open-file (stream *output-rules-file*
+                          :direction :output
+                          :if-exists :supersede
+                          :if-does-not-exist :create)
+    (loop for from being the hash-keys in *rules*
+          do (loop for to being the hash-keys in (getf (gethash from *rules*) :distribution)
+                   do (format stream "~{~a ~}=> ~a ~f~%" from to (gethash to (getf (gethash from *rules*) :distribution)))))))
+
+(defun main ()
+  (cleanup)
+  (build-training (parse-lists-for-integer (filter-by-min-length (read-lines-from-file-and-split #\Space *input-data-file*))))
+  (build-observations)
+  (build-distributions)
+  (setf *distributions-keys* (hash-keys *distributions*))
+  (generate-all-rules)
+  (output-rules)
+  (printf "finished")
+  )
