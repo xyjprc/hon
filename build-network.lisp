@@ -1,5 +1,8 @@
-;;; builds network of various orders using rules generated before.
-;;; Input: rules file (rules.csv) and highest order
+;;; builds High Order Network using rules generated with build-rules.
+
+;;; Use Common Lisp to compile and run. SBCL recommended.
+
+;;; Input: rules file (rules-test.csv) and highest order
 ;;; Output: network file in triples.
 ;;; C|A.B,E,0.3 means a vessel at port C (nth), coming from A (n-1th) and
 ;;; B (n-2th), the probability of going to E (n+1th) is 0.3
@@ -7,24 +10,12 @@
 ;;; Note: "from" is usually a list, with lengths from 1 to 5
 ;;; "to" can be EITHER a "string" (originally created) or a list (rewiring)
 
+;;; Jian Xu, 2015-02-19
+
 ;;; parameters
-;(defparameter *input-rules-file* "rules-weibo-mo1-ms5-t01.csv")
-;(defparameter *input-rules-file* "rules-lloyds-mo1-ms10-freq.csv")
-(defparameter *input-rules-file* "rules-clickstream-all-mo1.csv")
-;(defparameter *input-rules-file* "rules-test.csv")
-;(defparameter *input-rules-file* "rules-conventional.csv")
-;(defparameter *input-rules-file* "rules-conventional-sup10.csv")
-;(defparameter *input-rules-file* "rules-nd.csv")
-;(defparameter *input-rules-file* "rules-nd-conventional-sup10.csv")
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-(defparameter *max-order* 1) ;!!!!!!!!
-;(defparameter *output-network-file* "network-weibo-mo1-ms5-t01.csv")
-;(defparameter *output-network-file* "network-lloyds-mo1-ms10-freq.csv")
-(defparameter *output-network-file* "network-clickstream-all-mo1.csv")
-;(defparameter *output-network-file* "network-conventional.csv")
-;(defparameter *output-network-file* "network-conventional-sup10.csv")
-;(defparameter *output-network-file* "network-test.csv")
-;(defparameter *output-network-file* "network-nd-conventional-sup10.csv")
+(defparameter *input-rules-file* "rules-test.csv")
+(defparameter *max-order* 5)
+(defparameter *output-network-file* "network-test.csv")
 
 ;;; data
 (defparameter *rules* nil)
