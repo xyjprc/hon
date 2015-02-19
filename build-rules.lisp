@@ -1,5 +1,11 @@
-;;; Build rules from trajectories, e.g. Lloyds data
-;;; Input: trajectory file (Lloyds),
+;;; Build rules from trajectories, e.g. test-trace.csv
+
+;;; Use Common Lisp to compile and run. SBCL recommended.
+
+;;; Input: trajectory file, every line is a trajectory (e.g. global shipping)
+;;; test-trace.csv is supplied.
+;;; first element is identifier for the element that is moving (e.g. vessel id),
+;;; others are places (e.g. ports)
 ;;; min length of trajectory (defaut 8)
 ;;; max order (to prevent the search from growing infinitely) (default 5)
 ;;; distance method (default cosine distance)
@@ -8,47 +14,35 @@
 ;;; digits for testing (not used for building rules) (default 3)
 
 ;;; output: rules of variable lengths, and frequencies (e.g. A,B,C -> D 45)
-;;; output can be used for building our new network representations
+;;; output can be used for building High Order Network (HON)
 ;;; The new network representation can then be used to simulate walking
 ;;; Then a measure will be used to test the performance.
 
-;;; Note: for support, redundant observations for same vessel (trajectory) are
-;;; neglected. In other words, support is # of trajectories containing the
-;;; observation
-;;; If we need to use the old way, change pushnew to push
+;;; Note: for support, there are two ways to compute
+;;; The default way is to count every observation.
+;;; Another way is to neglect redundant observations for same vessel (trajectory)
+;;; In other words, support is # of trajectories containing the observation
+;;; If the other way needs to be used, change push to pushnew in save-observations
 
-;;; Note2: changed from pushnew to push 2014-11-21
-;;; Note3: support changed from # of instances in "from" to # of instances in "from->to"
+;;; Code can also be easily parallelized using pmapcar in lparallel
+;;; if compiler supports multithreading.
 
-;;; Jian Xu, 2014-11-24
+;;; Jian Xu, 2015-02-19
 
 
 ;(declaim (optimize (debug 3)))
 
 
 ;; parameters
-;(defparameter *input-data-file* "test-trace.csv")
-;(defparameter *input-data-file* "traces-lloyds.csv")
-;(defparameter *input-data-file* "traces-weibo-10M.txt")
-(defparameter *input-data-file* "traces-clickstream-all.csv")
-;(defparameter *input-data-file* "traces-nd.csv")
-(defparameter *min-length-of-trajectory* 8) ;!!!!!!!!!!
-;;;;;;;!!!!!!!!!!!!!!!!!!!!!!!!!
+(defparameter *input-data-file* "test-trace.csv")
+(defparameter *min-length-of-trajectory* 8)
 (defparameter *max-order* 1)
-;(defparameter *max-order* 1)
 (defparameter *distance-method* "cosine")
-(defparameter *distance-tolerance* 0.1);;!!!!!!!!!!!!!!
-;(defparameter *min-support* 10)
+(defparameter *distance-tolerance* 0.1)
 (defparameter *min-support* 5)
-(defparameter *digits-for-testing* 3) ;!!!!!!!!!!
-;(defparameter *digits-for-testing* 10)
+(defparameter *digits-for-testing* 3)
 
-;(defparameter *output-rules-file* "rules-weibo-mo1-ms10.csv")
-;(defparameter *output-rules-file* "rules-lloyds-mo4-ms1-t01.csv")
-;(defparameter *output-rules-file* "rules-conventional-sup10.csv")
-(defparameter *output-rules-file* "rules-clickstream-all-mo1.csv")
-;(defparameter *output-rules-file* "rules-nd.csv")
-;(defparameter *output-rules-file* "rules-nd-conventional-sup10.csv")
+(defparameter *output-rules-file* "rules-test.csv")
 
 ;;; data
 ;; vessel -> trajectory except last xxx steps
