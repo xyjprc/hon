@@ -17,3 +17,6 @@ This corresponds to Algorithm 2 in paper.
 
 ## Notes
 A test trajectory file test-trace.csv has been provided.
+
+## Contact
+Please contact Jian Xu (jxu5 at nd dot edu) for any question.
