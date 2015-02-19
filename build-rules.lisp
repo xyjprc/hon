@@ -24,6 +24,9 @@
 ;;; In other words, support is # of trajectories containing the observation
 ;;; If the other way needs to be used, change push to pushnew in save-observations
 
+;;; Note: for data other than trajectories, such as diffusion data,
+;;;
+
 ;;; Code can also be easily parallelized using pmapcar in lparallel
 ;;; if compiler supports multithreading.
 
@@ -128,6 +131,8 @@
   (loop for vessel being the hash-keys in *training*
         do (build-observations-for-vessel order vessel)))
 
+;;; change this function to take only the most recent steps as subsequences,
+;;; instead of all possible subsequences.
 (defun build-observations-for-vessel (order vessel)
   (let ((trajectory (gethash vessel *training*)))
     (dotimes (starting (- (length trajectory)
