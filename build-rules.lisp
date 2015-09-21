@@ -219,6 +219,7 @@
                                                              1))
                                   *distributions-keys*)))
     (dolist (from order-1-froms)
+      (add-to-rules from) ;;;;;;;;;; Newly added! All first order rules should be added. Jian 2015-08-23
       (extend-rule from from 1))))
     ;(lparallel.cognate:pmapcar (lambda (from) (extend-rule from from 1))
     ;                           order-1-froms)))
