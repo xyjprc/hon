@@ -36,11 +36,11 @@ There are ten 2nd order rules, ten 3rd order rules, ten 4th order rules, no othe
 Data generated using the aforementioned script is provided as traces-simulated-mesh-v100000-t100-mo4.csv
 
 ### Rule extraction with HON
-Use HON with a default setting of MaxOrder = 5, MinSupport = 5, tolerance = 0.1
+Use HON with a default setting of MaxOrder = 5, MinSupport = 5
 It should be able to detect all 30 of these rules of various orders,
 And will not detect "false" dependencies such as 5th order rules.
 The result is provided as rules-simulated-mesh-v100000-t100-mo5-ms5-t01.csv, note that for illustration here (since we are not going to build a network now), in this file when higher order rules are detected, corresponding lower order rules are not added recursively (see paper for details).
-The whole time to process these 10,000,000 movements should be under 30 seconds (unoptimized code, on single core).
+The whole time to process these 10,000,000 movements should be under 5 seconds (unoptimized code, on single core, excluding disk IO).
 
 
 ## Contact
