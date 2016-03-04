@@ -8,15 +8,14 @@
 ;;; others are places (e.g. ports)
 ;;; min length of trajectory (defaut 8)
 ;;; max order (to prevent the search from growing infinitely) (default 5)
-;;; distance method (default cosine distance)
-;;; distance tolerance
+;;; distance method (default KL divergence)
+;;; (distance tolerance: deprecated)
 ;;; min support
 ;;; digits for testing (not used for building rules) (default 3)
 
 ;;; output: rules of variable lengths, and frequencies (e.g. A,B,C -> D 45)
-;;; output can be used for building High Order Network (HON)
-;;; The new network representation can then be used to simulate walking
-;;; Then a measure will be used to test the performance.
+;;; output can be used for building Higher-Order Network (HON)
+
 
 ;;; Note: for support, there are two ways to compute
 ;;; The default way is to count every observation.
@@ -25,27 +24,37 @@
 ;;; If the other way needs to be used, change push to pushnew in save-observations
 
 ;;; Note: for data other than trajectories, such as diffusion data,
-;;;
+;;; change ExtractSubSequences such that it only takes the newest entity sequence.
 
 ;;; Code can also be easily parallelized using pmapcar in lparallel
 ;;; if compiler supports multithreading.
 
 ;;; Jian Xu, 2015-02-19
 
+;;; Note: changed from cosine distance to KL divergence
+;;; (eliminating the need of tolerance parameter)
+
+;;; Note: optimized performance on large data sets
+;;; Jian Xu, 2016-02-18
+
 
 ;(declaim (optimize (debug 3)))
 
-
-;; parameters
 (defparameter *input-data-file* "test-trace.csv")
-(defparameter *min-length-of-trajectory* 8)
-(defparameter *max-order* 1)
-(defparameter *distance-method* "cosine")
+
+(defparameter *min-length-of-trajectory* 8) 
+(defparameter *max-length-of-trajectory* 100) 
+(defparameter *max-order* 5)
+(defparameter *distance-method* "kl")
+
 (defparameter *distance-tolerance* 0.1)
 (defparameter *min-support* 5)
-(defparameter *digits-for-testing* 3)
+(defparameter *digits-for-testing* 3) 
 
 (defparameter *output-rules-file* "rules-test.csv")
+(defparameter *filter-bots* t)
+
+
 
 ;;; data
 ;; vessel -> trajectory except last xxx steps
@@ -56,6 +65,9 @@
 (defparameter *rules* (make-hash-table :test #'equal))
 (defparameter *distributions* (make-hash-table :test #'equal))
 (defparameter *distributions-keys* nil)
+(defparameter *children-lookup* (make-hash-table :test #'equal))
+
+
 
 ;;;;;;;;;;;;;;;
 ;;; updated 2014-11-20
@@ -111,6 +123,17 @@
                                        (1+ *min-length-of-trajectory*)))
              trajectories))
 
+(defun filter-by-max-length (trajectories)
+  (remove-if #'(lambda (trajectory) (> (length trajectory)
+                                       (1+ *max-length-of-trajectory*)))
+             trajectories))
+
+(defun filter-by-bots (trajectories)
+  (if *filter-bots*
+      (remove-if #'(lambda (trajectory) (member "43" trajectory :test #'string=))
+                 trajectories)
+      trajectories))
+
 (defun build-training (trajectories)
   (printf "build training")
   (dolist (trajectory trajectories)
@@ -160,6 +183,7 @@
   (defparameter *observations* (make-hash-table :test #'equal))
   (defparameter *rules* (make-hash-table :test #'equal))
   (defparameter *distributions* (make-hash-table :test #'equal))
+  (defparameter *children-lookup* (make-hash-table :test #'equal))
   (defparameter *distributions-keys* nil)
 )
 
@@ -217,9 +241,13 @@
   (printf "generating all rules")
   (let ((order-1-froms (remove-if #'(lambda (from) (> (length from)
                                                              1))
-                                  *distributions-keys*)))
+                                  *distributions-keys*))
+        (counter 1))
+    ;(printf (length order-1-froms))
     (dolist (from order-1-froms)
       (add-to-rules from) ;;;;;;;;;; Newly added! All first order rules should be added. Jian 2015-08-23
+      (printf `(,counter "/" ,(length order-1-froms)))
+      (incf counter)
       (extend-rule from from 1))))
     ;(lparallel.cognate:pmapcar (lambda (from) (extend-rule from from 1))
     ;                           order-1-froms)))
@@ -240,15 +268,17 @@
       (let* ((parent (gethash valid-from *distributions*))
              (parent-distribution (getf parent :distribution))
              (new-order (1+ order))
-             (children-from (remove-if #'(lambda (from)
-                                           ;; if length is not what we want
-                                           (or (/= new-order
-                                                   (length from))
-                                               ;; or if tail is not the same
-                                               (not (equal (cdr from)
-                                                           curr-from))))
-                                       *distributions-keys*)))
-        ;(printf `("v" ,valid-from "c" ,curr-from "o" ,order "c" ,children-from))
+             (children-from (get-children curr-from)))
+             ;(children-from (remove-if #'(lambda (from)
+             ;                              ;; if length is not what we want
+             ;                              (or (/= new-order
+             ;                                      (length from))
+             ;                                  ;; or if tail is not the same
+             ;                                  (not (equal (cdr from)
+             ;                                              curr-from))))
+             ;                          *distributions-keys*)))
+        ;(when (equal '(1716) valid-from)
+          ;(printf `("v" ,valid-from "c" ,curr-from "o" ,order "c" ,children-from)))
         ;; if no further rules available, add valid-from to *rules*
         (if (null children-from)
             (add-to-rules valid-from)
@@ -269,8 +299,14 @@
                       ;(maphash #'(lambda (k v) (format t "~a => ~a~%" k v)) parent-distribution)
                       ;(printf (cosine-similarity child-distribution parent-distribution))
                       ;(printf (distribution-similar child-distribution parent-distribution))
+                      ;(print (kl-divergence child-distribution parent-distribution))
+                      ;(print (/ order child-support))
+                      ;(print (distribution-similar child-distribution parent-distribution child-support order))
+                      ;(finish-output t)
                       (if (distribution-similar child-distribution
-                                                parent-distribution)
+                                                parent-distribution
+                                                child-support
+                                                new-order)
                           (extend-rule valid-from child-from new-order)
                           (extend-rule child-from child-from new-order))))))))))
 
@@ -278,13 +314,29 @@
 ;; a and b are hash tables, probably having different keys
 ;; if key is present in a but not in b, set it 0
 ;; compare the distance with distance threshold to say if a and b are similar
-(defun distribution-similar (a b)
+(defun distribution-similar (a b child-support order)
   (if (equal *distance-method* "cosine")
       (if (<= (- 1
                  (cosine-similarity a b))
               *distance-tolerance*)
           t
+          nil))
+
+  (if (equal *distance-method* "kl")
+      (if (<= (kl-divergence a b)
+              (/ order (log (1+ child-support)
+                            2)))
+          t
           nil)))
+
+(defun kl-divergence (a b)
+  (let ((divergence 0))
+    (dolist (to (hash-keys a))
+      (incf divergence (* (get-probability to a)
+                          (log (/ (get-probability to a)
+                                  (get-probability to b))
+                               2))))
+    divergence))
 
 (defun sum-of-squares (ht)
   (loop for item being the hash-values in ht
@@ -317,19 +369,35 @@
 (defun output-rules ()
   (printf "writing all rules")
   (with-open-file (stream *output-rules-file*
-                          :direction :output
-                          :if-exists :supersede
+                          :Direction :Output
+                          :If-exists :supersede
                           :if-does-not-exist :create)
     (loop for from being the hash-keys in *rules*
           do (loop for to being the hash-keys in (getf (gethash from *rules*) :distribution)
                    do (format stream "~{~a ~}=> ~a ~f~%" from to (gethash to (getf (gethash from *rules*) :distribution)))))))
 
+;; to speed up lookups when data is huge
+;; added 2016/02/18
+(defun build-children-lookup ()
+  (printf "building children lookup")
+  (dolist (key *distributions-keys*)
+    (let ((prevs (cdr key)))
+      (if (null (gethash prevs *children-lookup*))
+          (setf (gethash prevs *children-lookup*) nil))
+      (push key (gethash prevs *children-lookup*)))))
+
+(defun get-children (from)
+  (if (null (gethash from *children-lookup*))
+      nil
+      (gethash from *children-lookup*)))
+
 (defun main ()
   (cleanup)
-  (build-training (parse-lists-for-integer (filter-by-min-length (read-lines-from-file-and-split #\Space *input-data-file*))))
+  (build-training (parse-lists-for-integer (filter-by-bots (filter-by-max-length (filter-by-min-length (read-lines-from-file-and-split #\Space *input-data-file*))))))
   (build-observations)
   (build-distributions)
   (setf *distributions-keys* (hash-keys *distributions*))
+  (build-children-lookup)
   (generate-all-rules)
   (output-rules)
   (printf "finished")
