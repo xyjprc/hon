@@ -39,7 +39,8 @@ Data generated using the aforementioned script is provided as traces-simulated-m
 Use HON with a default setting of MaxOrder = 5, MinSupport = 5
 It should be able to detect all 30 of these rules of various orders,
 And will not detect "false" dependencies such as 5th order rules.
-The result is provided as rules-simulated-mesh-v100000-t100-mo5-ms5-t01.csv, note that for illustration here (since we are not going to build a network now), in this file when higher order rules are detected, corresponding lower order rules are not added recursively (see paper for details).
+The result is provided as rules-simulated-mesh-v100000-t100-mo5-ms5-t01.csv, note that for illustration here (since we are not going to build a network now), in this file when higher order rules are detected, corresponding lower order rules are not added recursively.
+If all preceding rules are added, following the algorithm in the paper, the expected result should be rules-simulated-mesh-v100000-t100-mo4-kl.csv.
 The whole time to process these 10,000,000 movements should be under 5 seconds (unoptimized code, on single core, excluding disk IO).
 
 
