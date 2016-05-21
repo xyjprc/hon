@@ -1,5 +1,5 @@
 # HON
-Code for generating Higher Order Network (HON) from data with higher order dependencies
+Code for generating Higher-order Network (HON) from data with higher-order dependencies
 
 ## Requirements
 Use Common Lisp to compile and run. SBCL recommended.
@@ -7,13 +7,17 @@ http://www.sbcl.org/
 Some libraries may require Quicklisp.
 http://www.quicklisp.org/
 
+_A python implementation is under development. If you are interested, please let me know._
+
 ## Workflow
 ### Rule extraction
 Use build-rules.lisp to extract rules from trajectories (or other types of data).
 This corresponds to Algorithm 1 in paper.
+Run function (main)
 ### Network wiring
 Use build-network.lisp to convert rules into High Order Network (HON) representation.
 This corresponds to Algorithm 2 in paper.
+Run function (main)
 
 ## Synthesized data
 ### Note
@@ -45,4 +49,5 @@ The whole time to process these 10,000,000 movements should be under 5 seconds (
 
 
 ## Contact
-Please contact Jian Xu (jxu5 at nd dot edu) for any question. If a Python version is desired, please let me know.
+Please contact Jian Xu (jxu5 at nd dot edu) for any question. 
+_A python implementation is under development. If you are interested, please let me know._
