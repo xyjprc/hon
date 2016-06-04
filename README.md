@@ -1,13 +1,18 @@
 # HON
 Code for generating Higher-order Network (HON) from data with higher-order dependencies
 
-## Requirements
-Use Common Lisp to compile and run. SBCL recommended.
-http://www.sbcl.org/
-Some libraries may require Quicklisp.
+## Environment
+The code is written in Common Lisp. Tested with SBCL http://www.sbcl.org/, but should run on any modern Common Lisp implementation.
+
+Use Quicklisp to easily install and call libraries, such as _split-sequence_ and parallelization.
 http://www.quicklisp.org/
 
+Tested on Linux, Windows and Mac.
+
 _A python implementation is under development. If you are interested, please let me know._
+
+## Installation
+
 
 ## Workflow
 ### Rule extraction
