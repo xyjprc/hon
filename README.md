@@ -47,19 +47,24 @@ Variable orders of "rules" extracted from the sequential data. See rules-simulat
 Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of ... [PrevPrevPort] [PrevPort] [CurrPort] => [TargetPort] [Probability]. 
 > If you want to output the number of observations instead of the normalized probability, in function (add-to-rules), change the dictionary of *distributions* to the length of the source nodes's value in *observations*, and remove (clrhash *observations*) in (build-distributions)
 
-#### Illustration
-![](https://github.com/xyjprc/hon/blob/master/Xusuppfig1.png)
-
-#### Algorithm
-![](https://github.com/xyjprc/hon/blob/master/Xualgorithm1part1.png)
-![](https://github.com/xyjprc/hon/blob/master/Xualgorithm1part2.png)
-
 ### 2. Network wiring
-Use build-network.lisp to convert rules into High Order Network (HON) representation.
-This corresponds to Algorithm 2 in paper.
-Run function (main)
 
-#### Output: HON edges in triplets [FromNode] [ToNode] [weight]
+This corresponds to Algorithm 1 in paper.
+
+Using Emacs and SLIME: open build-network.lisp, press CTRL+C twice to compile, run (main).
+
+Using Minimal environment: run sbcl, run twice (load "build-network.lisp"), run (main).
+
+#### Input file
+The file containing rules produced by the last step.
+
+#### Output file
+HON edges in triplets [FromNode],[ToNode],[weight]
+> Default weight is the probability of a random walker going from [FromNode] to [ToNode]. If you want to output the number of observations instead of the normalized probability, follow previous instructions.
+
+Every node can be a higher-order node, in the format of [CurrNode]|PrevNode.PrevPrevNode.PrevPrevPrevNode
+
+This representation (as comma deliminated network edges file) is directly compatible with the conventional network representation and analysis tools. The only difference is edge labels.
 
 ## Synthetic data
 ### Note
