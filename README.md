@@ -1,8 +1,10 @@
 # HON
 Code for generating Higher-order Network (HON) from data with higher-order dependencies
+* Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
+* Output: HON edges in triplets [FromNode] [ToNode] [weight]
 
 ## Compatibility
-The code is written in Common Lisp. Tested with SBCL http://www.sbcl.org/, but should run on any modern Common Lisp implementation.
+The code is written in Common Lisp. Tested with [SBCL](http://www.sbcl.org/), but should run on any modern Common Lisp implementation.
 
 Tested on Linux, Windows and Mac.
 
@@ -10,31 +12,50 @@ _A python implementation is under development. If you are interested, please let
 
 ## Setting up environment
 ### Recommended environment
-On *Linux*, follow this tutorial to set up Emacs, SBCL, Quicklisp and SLIME http://www.jonathanfischer.net/modern-common-lisp-on-linux/
+On *Linux*, follow [this tutorial](http://www.jonathanfischer.net/modern-common-lisp-on-linux/) to set up Emacs, SBCL, Quicklisp and SLIME 
 
-After installing Quicklisp http://www.quicklisp.org/, call ql:quickloads :split-sequence.
+After installing [Quicklisp](http://www.quicklisp.org/), call ql:quickloads :split-sequence.
 
-For other platforms, follow this tutorial http://cliki.net/Getting+Started
+For other platforms, follow [this tutorial](http://cliki.net/Getting+Started)
 
 ### Minimal environment
 Install SBCL and QuickLisp. 
 
-### Code
-Download all files from this repo. 
-
-
-
 ## Workflow
-### Rule extraction
-Use build-rules.lisp to extract rules from trajectories (or other types of data).
+### 1. Rule extraction
+
 This corresponds to Algorithm 1 in paper.
-Run function (main)
-### Network wiring
+
+Using Emacs and SLIME: open build-rules.lisp, press CTRL+C twice to compile, run (main).
+
+Using Minimal environment: run sbcl, run twice (load "build-rules.lisp"), run (main).
+
+#### Input file
+Trajectories / sequential data. See test-trace.csv or traces-simulated-mesh-v100000-t100-mo4.csv for example.
+
+In the context of ship movements, every line is a ship's trajectory, in the format of [ShipID] [Port1] [Port2] [Port3] ... 
+> Notice that the first element of every line is the ship's ID.
+
+ShipID and PortID can be any integer. 
+> Non-integers can be used if function _parse-lists-for-integer_ is removed from (main).
+
+Other types of trajectories or sequential data can be used, such as a person's clickstream of websites, music playing history, sequences of check-ins, and so on.
+
+#### Output file
+"Rules" extracted from the sequential data. See rules-simulated-mesh-v100000-t100-mo4-kl.csv for example.
+
+Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of [PreviousPorts] => [TargetPort] [Probability]
+> If you want to output the number of observations instead of the normalized probability, in function (add-to-rules), change the dictionary of *distributions* to the length of the source nodes's value in *observations*, and remove (clrhash *observations*) in (build-distributions)
+
+
+### 2. Network wiring
 Use build-network.lisp to convert rules into High Order Network (HON) representation.
 This corresponds to Algorithm 2 in paper.
 Run function (main)
 
-## Synthesized data
+#### Output: HON edges in triplets [FromNode] [ToNode] [weight]
+
+## Synthetic data
 ### Note
 We use a new way to synthesize the data to allow us adding higher order rules during movement synthesis (it is not feasible to add rules beyond third order using the same setting in paper, because movements matching multiple previous steps will unlikely happen). 
 ### Script
