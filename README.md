@@ -25,11 +25,13 @@ Install SBCL and QuickLisp. Call ql:quickloads :split-sequence.
 ## Workflow
 ### 1. Rule extraction
 
+Extracts higher and variable orders of dependencies from sequential data.
+
 This corresponds to Algorithm 1 in paper.
 
 Using Emacs and SLIME: open build-rules.lisp, press CTRL+C twice to compile, run (main).
 
-Using Minimal environment: run sbcl, run twice (load "build-rules.lisp"), run (main).
+Using Minimal environment: run sbcl, run twice (load "build-rules"), run (main).
 
 #### Input file
 Trajectories / sequential data. See test-trace.csv or traces-simulated-mesh-v100000-t100-mo4.csv for example.
@@ -90,11 +92,13 @@ The method used for comparing different probability distributions of choosing th
 
 ### 2. Network wiring
 
-This corresponds to Algorithm 1 in paper.
+Given the higher-order rules extracted in the last step, convert them to a network representation.
+
+This corresponds to Algorithm 2 in paper.
 
 Using Emacs and SLIME: open build-network.lisp, press CTRL+C twice to compile, run (main).
 
-Using Minimal environment: run sbcl, run twice (load "build-network.lisp"), run (main).
+Using Minimal environment: run sbcl, run twice (load "build-network"), run (main).
 
 #### Input file
 The file containing rules produced by the last step.
@@ -106,6 +110,15 @@ HON edges in triplets [FromNode],[ToNode],[weight]
 Every node can be a higher-order node, in the format of [CurrNode]|PrevNode.PrevPrevNode.PrevPrevPrevNode
 
 This representation (as comma deliminated network edges file) is directly compatible with the conventional network representation and analysis tools. The only difference is edge labels.
+
+#### Parameters
+Parameters are at the beginning of the file build-network.lisp, starting with *defparameter*.
+
+##### input-rules-file & output-network-file are self-explanatory.
+
+##### max-order
+Use the same value as in build-rules.lisp
+
 
 ## Synthetic data
 > It is not feasible to add rules beyond third order using the same setting in paper, because movements matching multiple previous steps will unlikely happen. However you can use a different setting to generate even higher orders.
