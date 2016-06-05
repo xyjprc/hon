@@ -5,22 +5,24 @@ See details in paper [Representing higher-order dependencies in networks](http:/
 * Output: HON edges in triplets [FromNode] [ToNode] [weight]
 
 ## Compatibility
-The code is written in Common Lisp. Tested with [SBCL](http://www.sbcl.org/), but should run on any modern Common Lisp implementation.
+The code is written in Common Lisp. Tested on Linux, Windows and Mac. 
 
-Tested on Linux, Windows and Mac.
+Tested with [SBCL](http://www.sbcl.org/), but should run with any modern Common Lisp implementation.
+
+
 
 _A python implementation is under development. If you are interested, please let me know._
 
-## Setting up environment
+## Setting up the environment
 ### Recommended environment
 On *Linux*, follow [this tutorial](http://www.jonathanfischer.net/modern-common-lisp-on-linux/) to set up Emacs, SBCL, Quicklisp and SLIME.
 
-After installing [Quicklisp](http://www.quicklisp.org/), call ql:quickloads :split-sequence.
+After installing [Quicklisp](http://www.quicklisp.org/), call (ql:quickloads :split-sequence) to install the split-sequence package.
 
 For other platforms, follow [this tutorial](http://cliki.net/Getting+Started)
 
 ### Minimal environment
-Install SBCL and QuickLisp. Call ql:quickloads :split-sequence.
+Install SBCL and QuickLisp. Call (ql:quickloads :split-sequence) to install the package.
 
 ## Workflow
 
@@ -53,7 +55,7 @@ Variable orders of "rules" extracted from the sequential data. See rules-simulat
 Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of ... [PrevPrevPort] [PrevPort] [CurrPort] => [TargetPort] [Probability]. 
 > If you want to output the number of observations instead of the normalized probability, in function (add-to-rules), change the dictionary of *distributions* to the length of the source nodes's value in *observations*, and remove (clrhash *observations*) in (build-distributions)
 
-#### Parameters
+#### Parameters and preprocessing filters
 Parameters are at the beginning of the file build-rules.lisp, starting with *defparameter*.
 
 ##### input-data-file & output-rules-file are self-explanatory.
@@ -61,7 +63,7 @@ Parameters are at the beginning of the file build-rules.lisp, starting with *def
 ##### max-order
 For each path, the rule extraction process attempts to increase the order until the maximum order is reached. The default value of 5 should be sufficient for most applications. Setting this value as 1 will yield a conventional first-order network. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper.
 
-> Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need further increasing max-order.
+> Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need to further increase the max-order.
 
 ##### min-support
 Observations that are less than min-support are discarded during preprocessing. 
@@ -111,6 +113,8 @@ HON edges in triplets [FromNode],[ToNode],[weight]
 > Default weight is the probability of a random walker going from [FromNode] to [ToNode]. If you want to output the number of observations instead of the normalized probability, follow previous instructions.
 
 Every node can be a higher-order node, in the format of [CurrNode]|PrevNode.PrevPrevNode.PrevPrevPrevNode
+
+> All nodes (first-order and higher-order) starting with the same [CurrNode]| represent the same physical location.
 
 This representation (as comma deliminated network edges file) is directly compatible with the conventional network representation and analysis tools. The only difference is edge labels.
 
