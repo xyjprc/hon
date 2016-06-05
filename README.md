@@ -61,12 +61,18 @@ Observations that are less than min-support are discarded during preprocessing.
 
 For example, if the patter [Shanghai, Singapore] -> [Tokyo] appears 500 times and [Zhenjiang, Shanghai, Singapore] -> [Tokyo] happened only 3 times, and min-support is 10, then [Zhenjiang, Shanghai, Singapore] -> [Tokyo] will not be considered as a higher-order rule.
 
-This parameter is useful for filtering out infrequent patterns that might be considered as higher-order rules. 
+This parameter is useful for filtering out infrequent patterns that might be considered as higher-order rules. Setting a reasonable min-support can (1) considerably decrease the network size and the time needed for computation and (2) potentially improving representation accuracy by filtering out noise. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper. 
+
+>If do not want to use this filter, set the value as 1.
 
 ##### min-length-of-trajectory
 Trajectories shorter than the given value are discarded during preprocessing. Useful for filtering out inactive individuals.
 > If do not want to use this filter, set the value as 1.
 
+##### digits-for-testing
+The last given steps in each trajectory are not used to for network construction (reserved for testing). 
+> If want to use full trajectories, set this value as 0.
+> max-order + digits-for-testing should be smaller or equal to min-length-of-trajectory.
 
 ### 2. Network wiring
 
