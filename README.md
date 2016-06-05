@@ -1,17 +1,27 @@
 # HON
 Code for generating Higher-order Network (HON) from data with higher-order dependencies
 
-## Environment
+## Compatibility
 The code is written in Common Lisp. Tested with SBCL http://www.sbcl.org/, but should run on any modern Common Lisp implementation.
-
-Use Quicklisp to easily install and call libraries, such as _split-sequence_ and parallelization.
-http://www.quicklisp.org/
 
 Tested on Linux, Windows and Mac.
 
 _A python implementation is under development. If you are interested, please let me know._
 
-## Installation
+## Setting up environment
+### Recommended environment
+On *Linux*, follow this tutorial to set up Emacs, SBCL, Quicklisp and SLIME http://www.jonathanfischer.net/modern-common-lisp-on-linux/
+
+After installing Quicklisp http://www.quicklisp.org/, call ql:quickloads :split-sequence.
+
+For other platforms, follow this tutorial http://cliki.net/Getting+Started
+
+### Minimal environment
+Install SBCL and QuickLisp. 
+
+### Code
+Download all files from this repo. 
+
 
 
 ## Workflow
