@@ -52,7 +52,7 @@
 (defparameter *digits-for-testing* 3) 
 
 (defparameter *output-rules-file* "rules-test.csv")
-(defparameter *filter-bots* t)
+(defparameter *filter-bots* nil)
 
 
 
