@@ -23,6 +23,9 @@ For other platforms, follow [this tutorial](http://cliki.net/Getting+Started)
 Install SBCL and QuickLisp. Call ql:quickloads :split-sequence.
 
 ## Workflow
+
+![](https://github.com/xyjprc/hon/blob/master/workflow.PNG)
+
 ### 1. Rule extraction
 
 Extracts higher and variable orders of dependencies from sequential data.
