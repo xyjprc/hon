@@ -1,5 +1,6 @@
 # HON
-Code for generating Higher-order Network (HON) from data with higher-order dependencies
+Code for generating Higher-order Network (HON) from data with higher-order dependencies.
+See details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
 * Output: HON edges in triplets [FromNode] [ToNode] [weight]
 
@@ -12,7 +13,7 @@ _A python implementation is under development. If you are interested, please let
 
 ## Setting up environment
 ### Recommended environment
-On *Linux*, follow [this tutorial](http://www.jonathanfischer.net/modern-common-lisp-on-linux/) to set up Emacs, SBCL, Quicklisp and SLIME 
+On *Linux*, follow [this tutorial](http://www.jonathanfischer.net/modern-common-lisp-on-linux/) to set up Emacs, SBCL, Quicklisp and SLIME.
 
 After installing [Quicklisp](http://www.quicklisp.org/), call ql:quickloads :split-sequence.
 
@@ -48,7 +49,24 @@ Every line of record represents a "rule", which is the (normalized) probability 
 > If you want to output the number of observations instead of the normalized probability, in function (add-to-rules), change the dictionary of *distributions* to the length of the source nodes's value in *observations*, and remove (clrhash *observations*) in (build-distributions)
 
 #### Parameters
-TODO
+Parameters are at the beginning of the file build-rules.lisp, starting with *defparameter*.
+
+##### max-order
+For each path, the rule extraction process attempts to increase the order until the maximum order is reached. The default value of 5 should be sufficient for most applications. Setting this value as 1 will yield a conventional first-order network. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper.
+
+> Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need further increasing max-order.
+
+##### min-support
+Observations that are less than min-support are discarded during preprocessing. 
+
+For example, if the patter [Shanghai, Singapore] -> [Tokyo] appears 500 times and [Zhenjiang, Shanghai, Singapore] -> [Tokyo] happened only 3 times, and min-support is 10, then [Zhenjiang, Shanghai, Singapore] -> [Tokyo] will not be considered as a higher-order rule.
+
+This parameter is useful for filtering out infrequent patterns that might be considered as higher-order rules. 
+
+##### min-length-of-trajectory
+Trajectories shorter than the given value are discarded during preprocessing. Useful for filtering out inactive individuals.
+> If do not want to use this filter, set the value as 1.
+
 
 ### 2. Network wiring
 
