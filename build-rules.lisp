@@ -185,6 +185,7 @@
   (defparameter *distributions* (make-hash-table :test #'equal))
   (defparameter *children-lookup* (make-hash-table :test #'equal))
   (defparameter *distributions-keys* nil)
+  ;(gc :full t) ;; force garbage collection to save memory; SBCL only
 )
 
 ;; The following puts restriction of min support for "from"
