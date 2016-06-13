@@ -15,11 +15,9 @@ _A python implementation is under development. If you are interested, please let
 
 ## Setting up the environment
 ### Recommended environment
-On *Linux*, follow [this tutorial](http://www.jonathanfischer.net/modern-common-lisp-on-linux/) to set up Emacs, SBCL, Quicklisp and SLIME.
+Follow [this tutorial](http://lisp-lang.org/learn/getting-started/) to set up Emacs, SBCL, Quicklisp and SLIME.
 
 After installing [Quicklisp](http://www.quicklisp.org/), call (ql:quickloads :split-sequence) to install the split-sequence package.
-
-For other platforms, follow [this tutorial](http://cliki.net/Getting+Started)
 
 ### Minimal environment
 Install SBCL and QuickLisp. Call (ql:quickloads :split-sequence) to install the package.
