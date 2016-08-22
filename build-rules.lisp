@@ -51,7 +51,7 @@
 (defparameter *min-support* 5)
 (defparameter *digits-for-testing* 3) 
 
-(defparameter *output-rules-file* "rules-test.csv")
+(defparameter *output-rules-file* "rules-synthetic.csv")
 (defparameter *filter-bots* nil)
 
 
