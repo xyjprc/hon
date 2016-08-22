@@ -13,9 +13,9 @@
 ;;; Jian Xu, 2015-02-19
 
 ;;; parameters
-(defparameter *input-rules-file* "rules-test.csv")
+(defparameter *input-rules-file* "rules-synthetic.csv")
 (defparameter *max-order* 5)
-(defparameter *output-network-file* "network-test.csv")
+(defparameter *output-network-file* "network-synthetic.csv")
 
 ;;; data
 (defparameter *rules* nil)
