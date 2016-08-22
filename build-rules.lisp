@@ -40,7 +40,7 @@
 
 ;(declaim (optimize (debug 3)))
 
-(defparameter *input-data-file* "test-trace.csv")
+(defparameter *input-data-file* "traces-simulated-mesh-v100000-t100-mo4.csv")
 
 (defparameter *min-length-of-trajectory* 8) 
 (defparameter *max-length-of-trajectory* 100) 
