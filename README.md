@@ -37,7 +37,7 @@ Using Emacs and SLIME: open build-rules.lisp, press CTRL+C twice to compile, run
 Using Minimal environment: run sbcl, run twice (load "build-rules"), run (main).
 
 #### Input file
-Trajectories / sequential data. See test-trace.csv or traces-simulated-mesh-v100000-t100-mo4.csv for example.
+Trajectories / sequential data. See traces-simulated-mesh-v100000-t100-mo4.csv for example.
 
 In the context of ship movements, every line is a ship's trajectory, in the format of [ShipID] [Port1] [Port2] [Port3] ... 
 > Notice that the first element of every line is the ship's ID.
