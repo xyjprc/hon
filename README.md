@@ -159,11 +159,23 @@ If all preceding rules are added, following the algorithm in the paper, the expe
 
 The whole time to process these 10,000,000 movements should be under 5 seconds (single thread, excluding disk IO time). Can be improved by using parallelization (needs compiler that enables parallelization), see comments in code for details.
 
+## PageRank on HON
+### Idea
+Now HON can be used as if it is a first-order network, for applications such as PageRank, clustering and others.
+
+For the result of PageRank, every (higher-order) node will have a PageRank value. For multiple nodes representing the same entity, such as Singapore|Shanghai and Singapore|Tokyo, the PageRank value of "Singapore" is the sum of all higher-order nodes "Singapore|xxx,xxx,...".
+
+### Code
+We provide the code for post-processing PageRank values, to illustrate how such post-processing of HON analysis results can be written in a few lines of code. The code is "hon-pagerank.py", written in Python, requires the networkx package for PageRank.
+
 ## Additional notes
+
 ### Q: Running large data sets gives "scbl exception Heap exhausted during garbage collection" error?
+
 A: Use sbcl --dynamic-space-size 8Gb when running the sbcl lisp interpreter. If you use Emacs, add the "--dynamic-space-size 8Gb" to the inferior lisp command.
 
 ### Q: Running large data sets takes too long.
+
 A: The whole process should typically finish within 1 minute and in most cases no more than 10 seconds. If no output is produced in a long time, check CPU utilization to see if the program is still running. If you use Emacs+SLIME, check the *inferior-lisp* buffer to see if heap has been exhausted and the interpreter has failed silently. Apply the tip above to increase the heap size.
 
 ## Contact
