@@ -51,6 +51,11 @@ Other types of trajectories or sequential data can be used, such as a person's c
 Variable orders of "rules" extracted from the sequential data. See rules-simulated-mesh-v100000-t100-mo4-kl.csv for example.
 
 Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of ... [PrevPrevPort] [PrevPort] [CurrPort] => [TargetPort] [Probability]. 
+
+> For example, the line 19 29 39 => 49 0.24421781
+means
+If a ship which is currently at port 39, coming from port 29, and one more previous step is 19, the ship's probability of going to port 49 is 0.24421781
+
 > If you want to output the number of observations instead of the normalized probability, in function (add-to-rules), change the dictionary of *distributions* to the length of the source nodes's value in *observations*, and remove (clrhash *observations*) in (build-distributions)
 
 #### Parameters and preprocessing filters
@@ -109,6 +114,11 @@ The file containing rules produced by the last step.
 
 #### Output file
 HON edges in triplets [FromNode],[ToNode],[weight]
+
+> For example, a line 39|29.19,49|39.29.19,0.24421781
+means:
+A node "39|29.19" has an edge pointing to node "49|39.29.19", and the edge weight is 0.24421781
+
 > Default weight is the probability of a random walker going from [FromNode] to [ToNode]. If you want to output the number of observations instead of the normalized probability, follow previous instructions.
 
 Every node can be a higher-order node, in the format of [CurrNode]|PrevNode.PrevPrevNode.PrevPrevPrevNode
