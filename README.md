@@ -1,5 +1,6 @@
 # HON
 Code for generating Higher-order Network (HON) from data with higher-order dependencies.
+See demonstrations at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com).
 See details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
 * Output: HON edges in triplets [FromNode] [ToNode] [weight]
