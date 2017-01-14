@@ -3,31 +3,23 @@ Code for generating the Higher-order Network (HON) from data with higher-order d
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
 * Output: HON edges in triplets [FromNode] [ToNode] [weight]
 
-# Must-see demonstration
+# Video demonstration -- check it out!
 Before trying out the code, please see demonstrations first at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com). A video demo will also be available soon on this website.
 
 Algorithm details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
 
+![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/RW.png)
 
-## Compatibility
-The code is written in Common Lisp. Tested on Linux, Windows and Mac. 
+# Implementation
+HON currently has implementations in Python (in the folder pyHON) and Common Lisp (in the folder cl-HON), both tested on Linux, Windows and Mac.
 
-Tested with [SBCL](http://www.sbcl.org/), but should run with any modern Common Lisp implementation.
+To set up the environment and run the code, please see the README.md files under the respective implementations.
 
+The Common Lisp implementation is the initial version used for the Science Advances experiments. It is faster than the Python implementation in most cases (can usually finish processing a network in a few seconds). For large or very complex data sets, it may require additional arguments for the compiler, since the default heap size in Common Lisp compilers are generally small.
 
+The Python implementation should yield identical results to the Common Lisp version. While it might be slower to execute, being an almost line-by-line conversion from the Pseudocode in the [Xu et al. 2016] paper, it is more readable. It can also scale up for big data without worrying about memory allocation, and can be easily parallelized.
 
-_A python implementation is under development. If you are interested, please let me know._
-
-## Setting up the environment
-### Recommended environment
-Follow [this tutorial](http://lisp-lang.org/learn/getting-started/) to set up Emacs, SBCL, Quicklisp and SLIME.
-
-After installing [Quicklisp](http://www.quicklisp.org/), call (ql:quickloads :split-sequence) to install the split-sequence package.
-
-### Minimal environment
-Install SBCL and QuickLisp. Call (ql:quickloads :split-sequence) to install the package.
-
-## Workflow
+# Workflow
 
 ![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/workflow-1024x262.png)
 
