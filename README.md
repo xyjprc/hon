@@ -25,7 +25,7 @@ Install SBCL and QuickLisp. Call (ql:quickloads :split-sequence) to install the 
 
 ## Workflow
 
-![](https://github.com/xyjprc/hon/blob/master/workflow.PNG)
+![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/workflow-1024x262.png)
 
 ### 1. Rule extraction
 
