@@ -1,9 +1,13 @@
 # HON
-Code for generating Higher-order Network (HON) from data with higher-order dependencies.
-See demonstrations at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com).
-See details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
+Code for generating the Higher-order Network (HON) from data with higher-order dependencies.
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
 * Output: HON edges in triplets [FromNode] [ToNode] [weight]
+
+# Must-see demonstration
+Before trying out the code, please see demonstrations first at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com). A video demo will also be available soon on this website.
+
+Algorithm details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
+
 
 ## Compatibility
 The code is written in Common Lisp. Tested on Linux, Windows and Mac. 
