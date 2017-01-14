@@ -1,7 +1,10 @@
 ### This file: line-by-line translation from Algorithm 2
 ### in the paper "Representing higher-order dependencies in networks"
 ### Code written by Jian Xu, Jan 2017
+
 ### Technical questions? Please contact i[at]jianxu[dot]net
+### Demo of HON: please visit http://www.HigherOrderNetwork.com
+### Latest code: please visit https://github.com/xyjprc/hon
 
 ### Call BuildNetwork()
 ### Input: Higher-order dependency rules

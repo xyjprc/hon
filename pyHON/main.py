@@ -1,7 +1,10 @@
 ### This package: Python implementation of the higher-order network (HON) construction algorithm.
 ### Paper: "Representing higher-order dependencies in networks"
 ### Code written by Jian Xu, Jan 2017
+
 ### Technical questions? Please contact i[at]jianxu[dot]net
+### Demo of HON: please visit http://www.HigherOrderNetwork.com
+### Latest code: please visit https://github.com/xyjprc/hon
 
 ### See details in README
 
@@ -15,9 +18,9 @@ MaxOrder = 5
 MinSupport = 10
 
 ## Initialize user parameters
-InputFileName = '../../data/traces-lloyds.csv'
-OutputRulesFile = '../../data/rules-lloyds.csv'
-OutputNetworkFile = '../../data/network-lloyds.csv'
+InputFileName = '../data/traces-simulated-mesh-v100000-t100-mo4.csv'
+OutputRulesFile = '../data/rules-syn.csv'
+OutputNetworkFile = '../data/network-syn.csv'
 
 LastStepsHoldOutForTesting = 3
 MinimumLengthForTraining = 5
