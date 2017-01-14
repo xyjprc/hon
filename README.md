@@ -257,4 +257,4 @@ A: We are currently working on a visualization and interactive exploration softw
 Before that, one can simply use the output csv file of this code for existing software packages such as Gephi.
 
 # Contact
-Please contact Jian Xu (jxu5 at nd dot edu) for technical questions. 
+Please contact [Jian Xu](http://jianxu.net/en/) (jxu5 at nd dot edu) for technical questions. 
