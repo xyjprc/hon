@@ -1,7 +1,7 @@
 # HON
 Python and Common Lisp code for generating the Higher-order Network (HON) from data with higher-order dependencies.
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
-* Output: HON edges in triplets [FromNode] [ToNode] [weight]
+* Output: HON edges in triplets [FromNode],[ToNode],[weight] as csv file.
 
 # Video demonstration -- check it out!
 Before trying out the code, please see demonstrations first at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com). A video demo will also be available soon on this website.
@@ -15,7 +15,7 @@ HON currently has implementations in Python (in the folder pyHON) and Common Lis
 
 The Common Lisp implementation is the initial version used for the Science Advances experiments. It is faster than the Python implementation in most cases (can usually finish processing a network in a few seconds). For large or very complex data sets, it may require additional arguments for the compiler, since the default heap size in Common Lisp compilers are generally small.
 
-The Python implementation should yield identical results to the Common Lisp version. While it might be slower to execute, being an almost line-by-line conversion from the Pseudocode in the [Xu et al. 2016] paper, it is more readable. It can also scale up for big data without worrying about memory allocation, and can be easily parallelized.
+The Python implementation should yield identical results to the Common Lisp version. While it might be slower to execute, it is more readable as it is almost a line-by-line conversion from the Pseudocode in the [Xu et al. 2016] paper. It can also scale up for big data without worrying about memory allocation, and can be easily parallelized.
 
 ## Setting up the environment
 
@@ -45,11 +45,11 @@ Install SBCL and QuickLisp. Call (ql:quickloads :split-sequence) to install the 
 ![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/workflow-1024x262.png)
 
 The workflow to construct the higher-order network is as follows:
-Given the raw sequential data, we first decide which nodes need to be split into higher-order nodes, and how high the orders are;
-Then we connect nodes representing different orders of dependency.
+given the raw sequential data, we first decide which nodes need to be split into higher-order nodes, and how high the orders are;
+then we connect nodes representing different orders of dependency.
 Finally the output is the higher-order network, which can be used like conventional network for analyses.
 
-> Python: run main.py to execute all procedures, or run BuildRules.py and BuildNetwork.py separately.
+> Python: run main.py to execute all procedures. 
 
 > Common Lisp: run build-rules.lisp and build-network.lisp separately.
 
@@ -71,6 +71,7 @@ In the context of ship movements, every line is a ship's trajectory, in the form
 
 ShipID and PortID can be any integer. 
 > Python: can be any character except space.
+
 > Common Lisp: Non-integers can be used if function _parse-lists-for-integer_ is removed from (main).
 
 Other types of trajectories or sequential data can be used, such as a person's clickstream of websites, music playing history, sequences of check-ins, and so on.
@@ -85,7 +86,7 @@ Every line of record represents a "rule", which is the (normalized) probability 
 
 > For example, the line 19 29 39 => 49 0.24421781
 means
-If a ship which is currently at port 39, coming from port 29, and one more previous step is 19, the ship's probability of going to port 49 is 0.24421781
+if a ship which is currently at port 39, coming from port 29, and one more previous step is 19, the ship's probability of going to port 49 is 0.24421781
 
 If you want to output the number of observations instead of the normalized probability:
 
@@ -95,16 +96,19 @@ If you want to output the number of observations instead of the normalized proba
 
 
 ### Parameters and preprocessing filters
+
 >Python: Parameters are at the beginning of the file main.py, with naming conventions slightly different than that of Common Lisp.
+
 >Common Lisp: Parameters are at the beginning of the file build-rules.lisp, starting with *defparameter*.
 
 #### input-data-file & output-rules-file are self-explanatory.
+
 > You may want to test the code with the synthetic trajectory first. Remember to use the file in ../data/
 
 #### max-order
 For each path, the rule extraction process attempts to increase the order until the maximum order is reached. The default value of 5 should be sufficient for most applications. Setting this value as 1 will yield a conventional first-order network. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper.
 
-> Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need to further increase the max-order.
+> Common Lisp: Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need to further increase the max-order.
 
 #### min-support
 Observations that are less than min-support are discarded during preprocessing. 
@@ -116,27 +120,41 @@ This parameter is useful for filtering out infrequent patterns that might be con
 > To skip this filter, set the value as 1.
 
 #### min-length-of-trajectory
+
+> Python: not implemented
+
 Trajectories shorter than the given value are discarded during preprocessing. Useful for filtering out inactive individuals.
+
 > To skip this filter, set the value as 1.
 
 #### max-length-of-trajectory
+
+> Python: not implemented
+
 Trajectories longer than the given value are discarded during preprocessing. Useful for filtering out abnormally long trajectories that dominate the network construction (generated by bots / faulty sensor data etc).
+
 > To skip this filter, set the value as 999999 or larger.
 
 #### digits-for-testing
 The last given steps in each trajectory are not used to for network construction (reserved for testing). 
+
 > To use full trajectories, set this value as 0.
+
 > max-order + digits-for-testing should be smaller or equal to min-length-of-trajectory.
 
 #### filter-bots
 > Python: not implemented
+
 Exclude certain locations that want to be excluded from trajectories. Useful for preprocessing. Default not used. To enable this filter, change the value from nil to t and change the list in function (filter-by-bots).
 
 
 #### distance-method
+
 > Python: not implemented. KL divergence is used by default, and uses the auto-adapting threshold in the [Xu et al. 2016] paper.
+
 The method used for comparing different probability distributions of choosing the next step, when extending the knowledge of previous locations. Default is KL-divergence, which is self-adaptable to paths of variable support / orders.
-> To use cosine similarity, set the parameter as "cosine" and set the parameter distance-tolerance, which means if the cosine similarity of the two distributions is smaller than 0.9, the two distributions are considered significantly different.
+
+> Common Lisp: To use cosine similarity, set the parameter as "cosine" and set the parameter distance-tolerance, which means if the cosine similarity of the two distributions is smaller than 0.9, the two distributions are considered significantly different.
 
 
 ## 2. Network wiring
@@ -166,10 +184,10 @@ Every node can be a higher-order node, in the format of [CurrNode]|PrevNode.Prev
 
 > All nodes (first-order and higher-order) starting with the same [CurrNode]| represent the same physical location.
 
-This representation (as comma deliminated network edges file) is directly compatible with the conventional network representation and analysis tools. The only difference is edge labels.
+This representation (as comma deliminated network edges file) is directly compatible with the conventional network representation and analysis tools. The only difference with the conventional network is edge labels. The csv file can be fed into many other network analysis tools (such as Gephi, NetworkX and so on) that are originally designed for first-order networks.
 
 ### Parameters
-> Python: at the beginning of  main.py
+> Python: No need to set the parameters.
 > Common Lisp: Parameters are at the beginning of the file build-network.lisp, starting with *defparameter*.
 
 #### input-rules-file & output-network-file are self-explanatory.
@@ -181,7 +199,7 @@ Use the same value as in build-rules.lisp
 # Synthetic data
 
 ## Script
-The script ./applications/synthesize-trace-mesh.py (run with python or python3) synthesizes trajectories of vessels going certain steps on a 10x10 grid (with wrapping).
+The script ./applications/synthesize-trace-mesh.py (run with python or python3) synthesizes trajectories of vessels going certain steps on a 10x10 grid (with wrapping). See details in the methods part of the paper.
 
 Normally a vessel will go either up/down/left/right with the same probability (see function NextStep), 
 (vessel movements are generated almost randomly with the following exceptions).
@@ -222,13 +240,21 @@ We provide the code for post-processing PageRank values, to illustrate how such 
 
 # Additional notes
 
-## Q: Using Common Lisp, running large data sets gives "scbl exception Heap exhausted during garbage collection" error?
+### Q: Using Common Lisp, running large data sets gives "scbl exception Heap exhausted during garbage collection" error?
 
 A: Use sbcl --dynamic-space-size 8Gb when running the sbcl lisp interpreter. If you use Emacs, add the "--dynamic-space-size 8Gb" to the inferior lisp command.
 
 ### Q: Using Common Lisp, running large data sets takes too long.
 
 A: The whole process should typically finish within 1 minute and in most cases no more than 10 seconds. If no output is produced in a long time, check CPU utilization to see if the program is still running. If you use Emacs+SLIME, check the *inferior-lisp* buffer to see if heap has been exhausted and the interpreter has failed silently. Apply the tip above to increase the heap size.
+
+### Q: How to visualize HON?
+
+A: We are currently working on a visualization and interactive exploration software package which will be available for download soon. Please check back later at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com).
+
+![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/1.jpg)
+
+Before that, one can simply use the output csv file of this code for existing software packages such as Gephi.
 
 # Contact
 Please contact Jian Xu (jxu5 at nd dot edu) for technical questions. 
