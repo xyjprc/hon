@@ -1,8 +1,12 @@
-### Following: line-by-line translation from Algorithm 1
+### This file: line-by-line translation from Algorithm 1
 ### in the paper "Representing higher-order dependencies in networks"
+### Code written by Jian Xu, Jan 2017
+### Technical questions? Please contact i[at]jianxu[dot]net
 
+### Call ExtractRules()
 ### Input: Trajectory
 ### Output: Higher-order dependency rules
+### See details in README
 
 from collections import defaultdict, Counter
 import math

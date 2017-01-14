@@ -1,10 +1,14 @@
-### Python implementation of the higher-order network (HON) construction algorithm.
+### This package: Python implementation of the higher-order network (HON) construction algorithm.
 ### Paper: "Representing higher-order dependencies in networks"
-### Code written by Jian Xu
+### Code written by Jian Xu, Jan 2017
 ### Technical questions? Please contact i[at]jianxu[dot]net
 
+### See details in README
+
+
 import BuildRules
-from collections import defaultdict
+import BuildNetwork
+
 
 ## Initialize algorithm parameters
 MaxOrder = 5
@@ -13,8 +17,8 @@ MinSupport = 10
 ## Initialize user parameters
 InputFileName = '../../data/traces-lloyds.csv'
 OutputRulesFile = '../../data/rules-lloyds.csv'
-#InputFileName = '../../data/traces-test.csv'
-#OutputRulesFile = '../../data/rules-test.csv'
+OutputNetworkFile = '../../data/network-lloyds.csv'
+
 LastStepsHoldOutForTesting = 3
 MinimumLengthForTraining = 5
 InputFileDeliminator = ' '
@@ -72,7 +76,27 @@ def DumpRules(Rules, OutputRulesFile):
     with open(OutputRulesFile, 'w') as f:
         for Source in Rules:
             for Target in Rules[Source]:
-                f.write(' '.join([' '.join([str(x) for x in Source]), '=>', Target, str(Rules[Source][Target]), '\n']))
+                f.write(' '.join([' '.join([str(x) for x in Source]), '=>', Target, str(Rules[Source][Target])]) + '\n')
+
+def DumpNetwork(Network, OutputNetworkFile):
+    VPrint('Dumping network to file')
+    with open(OutputNetworkFile, 'w') as f:
+        for source in Network:
+            for target in Network[source]:
+                f.write(','.join([SequenceToNode(source), SequenceToNode(target), str(Network[source][target])]) + '\n')
+
+def SequenceToNode(seq):
+    curr = seq[-1]
+    node = curr + '|'
+    seq = seq[:-1]
+    while len(seq) > 0:
+        curr = seq[-1]
+        node = node + curr + '.'
+        seq = seq[:-1]
+    if node[-1] == '.':
+        return node[:-1]
+    else:
+        return node
 
 def VPrint(string):
     if Verbose:
@@ -87,3 +111,5 @@ if __name__ == "__main__":
     VPrint(len(TrainingTrajectory))
     Rules = BuildRules.ExtractRules(TrainingTrajectory, MaxOrder, MinSupport)
     DumpRules(Rules, OutputRulesFile)
+    Network = BuildNetwork.BuildNetwork(Rules)
+    DumpNetwork(Network, OutputNetworkFile)
