@@ -256,5 +256,8 @@ A: We are currently working on a visualization and interactive exploration softw
 
 Before that, one can simply use the output csv file of this code for existing software packages such as Gephi.
 
+# Cite as
+Jian Xu, Thanuka L. Wickramarathne, and Nitesh V. Chawla. "Representing higher-order dependencies in networks." Science Advances 2, no. 5 (2016): e1600028.
+
 # Contact
 Please contact [Jian Xu](http://jianxu.net/en/) (jxu5 at nd dot edu) for technical questions. 
