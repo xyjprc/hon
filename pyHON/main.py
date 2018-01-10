@@ -1,6 +1,10 @@
+### Major update: parameter free and magnitudes faster than previous versions.
+### Paper and pseudocode: https://arxiv.org/abs/1712.09658
+
+
 ### This package: Python implementation of the higher-order network (HON) construction algorithm.
 ### Paper: "Representing higher-order dependencies in networks"
-### Code written by Jian Xu, Jan 2017
+### Code written by Jian Xu, Apr 2017
 
 ### Technical questions? Please contact i[at]jianxu[dot]net
 ### Demo of HON: please visit http://www.HigherOrderNetwork.com
@@ -8,22 +12,35 @@
 
 ### See details in README
 
-
-import BuildRules
+import BuildRulesFastParameterFree
+import BuildRulesFastParameterFreeFreq
 import BuildNetwork
+import itertools
+
 
 
 ## Initialize algorithm parameters
-MaxOrder = 5
+MaxOrder = 99
 MinSupport = 10
 
 ## Initialize user parameters
-InputFileName = '../data/traces-simulated-mesh-v100000-t100-mo4.csv'
-OutputRulesFile = '../data/rules-syn.csv'
-OutputNetworkFile = '../data/network-syn.csv'
+#InputFileName = '../data/traces-simulated-mesh-v100000-t100-mo4.csv'
+#OutputRulesFile = '../data/rules-syn.csv'
+#OutputNetworkFile = '../data/network-syn.csv'
 
-LastStepsHoldOutForTesting = 3
-MinimumLengthForTraining = 5
+## Initialize user parameters
+#InputFileName = '../../../../C2/data/synthetic/1098_ModifyMixedOrder.csv'
+InputFileName = '../data/subpath_30_notime.txt'
+
+#InputFileName = '../data/synthetic-major/9999.csv'
+#InputFileName = '../data/synthetic-major/1000_ModifyMixedOrder.csv'
+#InputFileName = '../data/traces-test.csv'
+#InputFileName = '../data/traces-lloyds.csv'
+OutputRulesFile = '../data/rules-cell30.csv'
+OutputNetworkFile = '../data/network-cell30.csv'
+
+LastStepsHoldOutForTesting = 0
+MinimumLengthForTraining = 1
 InputFileDeliminator = ' '
 Verbose = True
 
@@ -70,8 +87,12 @@ def BuildTrainingAndTesting(RawTrajectories):
     Testing = []
     for trajectory in RawTrajectories:
         ship, movement = trajectory
-        Training.append([ship, movement[:-LastStepsHoldOutForTesting]])
-        Testing.append([ship, movement[-LastStepsHoldOutForTesting]])
+        movement = [key for key,grp in itertools.groupby(movement)] # remove adjacent duplications
+        if LastStepsHoldOutForTesting > 0:
+            Training.append([ship, movement[:-LastStepsHoldOutForTesting]])
+            Testing.append([ship, movement[-LastStepsHoldOutForTesting]])
+        else:
+            Training.append([ship, movement])
     return Training, Testing
 
 def DumpRules(Rules, OutputRulesFile):
@@ -83,10 +104,13 @@ def DumpRules(Rules, OutputRulesFile):
 
 def DumpNetwork(Network, OutputNetworkFile):
     VPrint('Dumping network to file')
+    LineCount = 0
     with open(OutputNetworkFile, 'w') as f:
         for source in Network:
             for target in Network[source]:
                 f.write(','.join([SequenceToNode(source), SequenceToNode(target), str(Network[source][target])]) + '\n')
+                LineCount += 1
+    VPrint(str(LineCount) + ' lines written.')
 
 def SequenceToNode(seq):
     curr = seq[-1]
@@ -104,15 +128,39 @@ def SequenceToNode(seq):
 def VPrint(string):
     if Verbose:
         print(string)
+
+
+def BuildHON(InputFileName, OutputNetworkFile):
+    RawTrajectories = ReadSequentialData(InputFileName)
+    TrainingTrajectory, TestingTrajectory = BuildTrainingAndTesting(RawTrajectories)
+    VPrint(len(TrainingTrajectory))
+    Rules = BuildRulesFastParameterFree.ExtractRules(TrainingTrajectory, MaxOrder, MinSupport)
+    # DumpRules(Rules, OutputRulesFile)
+    Network = BuildNetwork.BuildNetwork(Rules)
+    DumpNetwork(Network, OutputNetworkFile)
+    VPrint('Done: '+InputFileName)
+
+def BuildHONfreq(InputFileName, OutputNetworkFile):
+    print('FREQ mode!!!!!!')
+    RawTrajectories = ReadSequentialData(InputFileName)
+    TrainingTrajectory, TestingTrajectory = BuildTrainingAndTesting(RawTrajectories)
+    VPrint(len(TrainingTrajectory))
+    Rules = BuildRulesFastParameterFreeFreq.ExtractRules(TrainingTrajectory, MaxOrder, MinSupport)
+    # DumpRules(Rules, OutputRulesFile)
+    Network = BuildNetwork.BuildNetwork(Rules)
+    DumpNetwork(Network, OutputNetworkFile)
+    VPrint('Done: '+InputFileName)
+
 ###########################################
 # Main function
 ###########################################
 
 if __name__ == "__main__":
+    print('FREQ mode!!!!!!')
     RawTrajectories = ReadSequentialData(InputFileName)
     TrainingTrajectory, TestingTrajectory = BuildTrainingAndTesting(RawTrajectories)
     VPrint(len(TrainingTrajectory))
-    Rules = BuildRules.ExtractRules(TrainingTrajectory, MaxOrder, MinSupport)
+    Rules = BuildRulesFastParameterFreeFreq.ExtractRules(TrainingTrajectory, MaxOrder, MinSupport)
     DumpRules(Rules, OutputRulesFile)
     Network = BuildNetwork.BuildNetwork(Rules)
     DumpNetwork(Network, OutputNetworkFile)
