@@ -266,5 +266,7 @@ Before that, one can simply use the output csv file of this code for existing so
 # Cite as
 Jian Xu, Thanuka L. Wickramarathne, and Nitesh V. Chawla. "Representing higher-order dependencies in networks." Science Advances 2, no. 5 (2016): e1600028.
 
+Jian Xu, Mandana Saebi, Bruno Ribeiro, Lance M. Kaplan, and Nitesh V. Chawla. "Detecting Anomalies in Sequential Data with Higher-order Networks." arXiv preprint arXiv:1712.09658 (2017).
+
 # Contact
 Please contact [Jian Xu](http://jianxu.net/en/) (jxu5 at nd dot edu) for technical questions. 
