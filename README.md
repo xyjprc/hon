@@ -3,6 +3,10 @@ Python and Common Lisp code for generating the Higher-order Network (HON) from d
 * Input: Trajectories / sequential data, such as ship movements among ports, a person's clickstream of websites, and so on.
 * Output: HON edges in triplets [FromNode],[ToNode],[weight] as csv file.
 
+# Major update
+Now parameter-free and magnitudes faster than the previous version! Import BuildRulesFastParameterFree.py instead of BuildRules.py. More documentation coming soon.
+Refer to the paper [Detecting Anomalies in Sequential Data with Higher-order Networks](https://arxiv.org/abs/1712.09658).
+
 # [Video demonstration -- check it out!](http://www.HigherOrderNetwork.com)
 Before trying out the code, please see demonstrations first at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com). A video demo will also be available soon on this website.
 
