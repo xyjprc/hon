@@ -38,7 +38,7 @@ def Rewire(source, target):
     PrevSource = source[:-1]
     PrevTarget = (source[-1],)
     if not PrevSource in Graph or not source in Graph[PrevSource]:
-        Graph[PrevSource][source] = Graph[source][target]
+        Graph[PrevSource][source] = Graph[PrevSource][PrevTarget]
         del(Graph[PrevSource][PrevTarget])
 
 def RewireTails():
