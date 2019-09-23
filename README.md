@@ -4,16 +4,16 @@ Python and Common Lisp code for generating the Higher-order Network (HON) from d
 * Output: HON edges in triplets [FromNode],[ToNode],[weight] as csv file.
 
 # Major update
-Now *parameter-free* and *magnitudes faster* than the previous version! 
+Now *parameter-free* and *magnitudes faster* than the previous version!
 
 Import BuildRulesFastParameterFree.py instead of BuildRules.py. More documentation coming soon.
 
 Refer to the paper [Detecting Anomalies in Sequential Data with Higher-order Networks](https://arxiv.org/abs/1712.09658).
 
-# [Video demonstration -- check it out!](http://www.HigherOrderNetwork.com)
+# [Video demonstration -- check it out first!](http://www.HigherOrderNetwork.com)
 Before trying out the code, please see demonstrations first at [HigherOrderNetwork.com](http://www.HigherOrderNetwork.com). A video demo will also be available soon on this website.
 
-Algorithm details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028).
+Algorithm details in paper [Representing higher-order dependencies in networks](http://advances.sciencemag.org/content/2/5/e1600028). Related papers, slides, tutorials available in the "papers" folder.
 
 ![](http://www.higherordernetwork.com/wp-content/uploads/2016/11/RW.png)
 
@@ -28,7 +28,7 @@ The Python implementation should yield identical results to the Common Lisp vers
 
 ### Python
 
-Tested with recent version of Python3, should work with recent version of Python2. 
+Tested with recent version of Python3, should work with recent version of Python2.
 
 #### Recommended environment
 
@@ -56,7 +56,7 @@ given the raw sequential data, we first decide which nodes need to be split into
 then we connect nodes representing different orders of dependency.
 Finally the output is the higher-order network, which can be used like conventional network for analyses.
 
-> Python: run main.py to execute all procedures. 
+> Python: run main.py to execute all procedures.
 
 > Common Lisp: run build-rules.lisp and build-network.lisp separately.
 
@@ -73,10 +73,10 @@ This corresponds to Algorithm 1 in paper.
 ### Input file
 Trajectories / sequential data. See ./data/traces-simulated-mesh-v100000-t100-mo4.csv for example.
 
-In the context of ship movements, every line is a ship's trajectory, in the format of [ShipID] [Port1] [Port2] [Port3] ... 
+In the context of ship movements, every line is a ship's trajectory, in the format of [ShipID] [Port1] [Port2] [Port3] ...
 > Notice that the first element of every line is the ship's ID.
 
-ShipID and PortID can be any integer. 
+ShipID and PortID can be any integer.
 > Python: can be any character except space.
 
 > Common Lisp: Non-integers can be used if function _parse-lists-for-integer_ is removed from (main).
@@ -89,7 +89,7 @@ Other types of trajectories or sequential data can be used, such as a person's c
 #### Output file
 Variable orders of "rules" extracted from the sequential data. See rules-simulated-mesh-v100000-t100-mo4-kl.csv for example.
 
-Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of ... [PrevPrevPort] [PrevPort] [CurrPort] => [TargetPort] [Probability]. 
+Every line of record represents a "rule", which is the (normalized) probability of going to [TargetPort] from [PreviousPorts], in the format of ... [PrevPrevPort] [PrevPort] [CurrPort] => [TargetPort] [Probability].
 
 > For example, the line 19 29 39 => 49 0.24421781
 means
@@ -118,11 +118,11 @@ For each path, the rule extraction process attempts to increase the order until 
 > Common Lisp: Setting this parameter too large may result in (1) long running time and/or (2) exhausting the heap and die silently (run sbcl with larger dynamic-space-size). Try increasing the value of this parameter progressively: if max-order is 5 but the rules extracted show at most 3rd order, then there is no need to further increase the max-order.
 
 #### min-support
-Observations that are less than min-support are discarded during preprocessing. 
+Observations that are less than min-support are discarded during preprocessing.
 
 For example, if the patter [Shanghai, Singapore] -> [Tokyo] appears 500 times and [Zhenjiang, Shanghai, Singapore] -> [Tokyo] happened only 3 times, and min-support is 10, then [Zhenjiang, Shanghai, Singapore] -> [Tokyo] will not be considered as a higher-order rule.
 
-This parameter is useful for filtering out infrequent patterns that might be considered as higher-order rules. Setting a reasonable min-support can (1) considerably decrease the network size and the time needed for computation and (2) potentially improving representation accuracy by filtering out noise. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper. 
+This parameter is useful for filtering out infrequent patterns that might be considered as higher-order rules. Setting a reasonable min-support can (1) considerably decrease the network size and the time needed for computation and (2) potentially improving representation accuracy by filtering out noise. Discussion of this parameter (how it influences the accuracy of representation and the size of the network) is given in the supporting information of the paper.
 
 > To skip this filter, set the value as 1.
 
@@ -143,7 +143,7 @@ Trajectories longer than the given value are discarded during preprocessing. Use
 > To skip this filter, set the value as 999999 or larger.
 
 #### digits-for-testing
-The last given steps in each trajectory are not used to for network construction (reserved for testing). 
+The last given steps in each trajectory are not used to for network construction (reserved for testing).
 
 > To use full trajectories, set this value as 0.
 
@@ -208,7 +208,7 @@ Use the same value as in build-rules.lisp
 ## Script
 The script ./applications/synthesize-trace-mesh.py (run with python or python3) synthesizes trajectories of vessels going certain steps on a 10x10 grid (with wrapping). See details in the methods part of the paper.
 
-Normally a vessel will go either up/down/left/right with the same probability (see function NextStep), 
+Normally a vessel will go either up/down/left/right with the same probability (see function NextStep),
 (vessel movements are generated almost randomly with the following exceptions).
 
 We add a few higher order rules to control the generation of vessel movements:
@@ -221,7 +221,7 @@ There are ten 2nd order rules, ten 3rd order rules, ten 4th order rules, no othe
 > It is not feasible to add rules beyond third order using the same setting in paper, because movements matching multiple previous steps will unlikely happen. However you can use a different setting to generate even higher orders.
 
 ## Data
-Default setting simulates movements of 100,000 vessels, each vessel visits 100 ports following the aforementioned process. 
+Default setting simulates movements of 100,000 vessels, each vessel visits 100 ports following the aforementioned process.
 Thus 10,000,000 movements will be generated by default.
 > Data generated using the aforementioned script is provided as traces-simulated-mesh-v100000-t100-mo4.csv
 
@@ -269,4 +269,4 @@ Jian Xu, Thanuka L. Wickramarathne, and Nitesh V. Chawla. "Representing higher-o
 Jian Xu, Mandana Saebi, Bruno Ribeiro, Lance M. Kaplan, and Nitesh V. Chawla. "Detecting Anomalies in Sequential Data with Higher-order Networks." arXiv preprint arXiv:1712.09658 (2017).
 
 # Contact
-Please contact [Jian Xu](http://jianxu.net/en/) (jxu5 at nd dot edu) for technical questions. 
+Please contact [Jian Xu](http://jianxu.net/en/) (jxu5 at nd dot edu) for technical questions.
