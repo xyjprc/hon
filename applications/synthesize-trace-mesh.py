@@ -19,11 +19,12 @@
 
 
 import random
+from time import time
 
 NumOfVessels = 100000
 LengthOfTrace = 100
 
-
+start = time()
 def NextStep(port):
     random.seed()
     up = (port - 10) % 100
@@ -93,30 +94,49 @@ def BiasedNextStep(port):
         return down
 
 
-traces = []
+traces = [None]*NumOfVessels
 
 for vessel in range(NumOfVessels):
     if vessel % 100 == 0:
         print(vessel)
-    trace = []
+    trace = [None]*LengthOfTrace
     for step in range(LengthOfTrace):
         port = -1
         random.seed()
-        if len(trace) == 0:
+        # if len(trace) == 0:
+        if step == 0:
             port = random.randint(0, 99)
-        if len(trace) == 1:
-            port = NextStep(trace[-1])
-        if len(trace) == 2:
-            port = OrderTwoNext(trace[-1], trace[-2])
-        if len(trace) == 3:
-            port = OrderThreeNext(trace[-1], trace[-2], trace[-3])
-        if len(trace) >= 4:
-            port = OrderFourNext(trace[-1], trace[-2], trace[-3], trace[-4])
-        trace.append(port)
-    traces.append(trace)
+        # if len(trace) == 1:
+        elif step == 1:
+            # port = NextStep(trace[-1])
+            # step = 1  previous step - 1 = 0 ; trace[0]
+            port = NextStep(trace[step-1])
+        # if len(trace) == 2:
+        elif step == 2:
+            # port = OrderTwoNext(trace[-1], trace[-2])
+            # step = 2 , index 1, 0
+            port = OrderTwoNext(trace[step-1] , trace[step-2])
+        # if len(trace) == 3:
+        elif step == 3:
+            # port = OrderThreeNext(trace[-1], trace[-2], trace[-3])
+            # step = 3 index = 2,1,0
+            port = OrderThreeNext(trace[step-1], trace[step-2], trace[step-3])
+        # if len(trace) >= 4:
+        elif step >= 4:
+            # port = OrderFourNext(trace[-1], trace[-2], trace[-3], trace[-4])
+            # step 4 : index 3, 2, 1, 0
+            # step 5 : index 4, 3, 2, 1
+            port = OrderFourNext(trace[step-1], trace[step-2], trace[step-3], trace[step-4])
+        trace[step] = port
+    traces[vessel] = trace
 
 with open('traces-simulated-mesh-v100000-t100-mo4.csv', 'w') as f:
-    vin = 1
-    for trace in traces:
-        f.write(str(vin) + ' ' + ' '.join([str(x) for x in trace]) + '\n')
-        vin += 1
+    # vin = 1
+    # for trace in traces:
+    #     f.write(str(vin) + ' ' + ' '.join([str(x) for x in trace]) + '\n')
+    #     vin += 1
+    for vin , trace in enumerate(traces):
+        f.write(str(vin + 1) + ' ' + ' '.join([str(x) for x in trace]) + '\n')
+
+end = time()
+print("Total seconds : " , round(end - start , 2))
